@@ -1,17 +1,25 @@
 const express = require("express");
+const app = express();
+const port = process.env.PORT || 4000;
 const cors = require("cors");
 const swaggerJSDoc = require("swagger-jsdoc");
 const swaggerUI = require("swagger-ui-express");
+app.listen(port, () => {
+  console.log("Server listening at port 4000 !!!!");
+});
 
-const port = process.env.PORT || 4000;
+//Connect socket IO
+const http = require("http").createServer();
+http.listen(4001);
+const io = require("socket.io").listen(http);
+
 const bodyParser = require("body-parser");
-const app = express();
 app.use(cors());
 app.use(bodyParser.json());
-
 //import Controller
 const RecipesController = require("./Controller/RecipesController");
 
+//https://flutterapp-test.herokuapp.com/
 const swaggerOptions = {
   swaggerDefinition: {
     info: {
@@ -52,6 +60,15 @@ app.get("/Recipes/GetAll", (req, res) => {
   RecipesController.GetAllRecipes(req, res);
 });
 
-app.listen(port, () => {
-  console.log("Example app listen on port 4000!");
+io.on("connection", (socket) => {
+  console.log("New Client " + socket.id);
+  socket.emit("id", socket.id);
+  socket.on("send", (value) => {
+    console.log(value);
+    socket.emit("receive", "Server: " + value);
+  });
+  socket.on("disconnect", () => {
+    console.log("ABC");
+    socket.disconnect();
+  });
 });

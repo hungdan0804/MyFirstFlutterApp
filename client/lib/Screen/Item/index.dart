@@ -13,22 +13,22 @@ class ItemScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _MyHomePage(
+    return _MyItemPage(
       data: data,
     );
   }
 }
 
-class _MyHomePage extends StatefulWidget {
-  _MyHomePage({Key key, this.data}) : super(key: key);
+class _MyItemPage extends StatefulWidget {
+  _MyItemPage({Key key, this.data}) : super(key: key);
 
   final String data;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MyItemPageState createState() => _MyItemPageState();
 }
 
-class _MyHomePageState extends State<_MyHomePage> {
+class _MyItemPageState extends State<_MyItemPage> {
   String get data => widget.data;
 
   @override

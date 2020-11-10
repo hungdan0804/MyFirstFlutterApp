@@ -2,20 +2,23 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutterapp/Object/GlobalState.dart';
+import 'package:flutter_simple_dependency_injection/injector.dart';
 import 'package:flutterapp/Object/Recipes.dart';
+import 'package:flutterapp/Screen/Chat/index.dart';
 import 'package:flutterapp/Screen/Item/index.dart';
+import 'package:flutterapp/Util/AppInitializer.dart';
+import 'package:flutterapp/Util/DependencyInjection.dart';
+import 'package:flutterapp/Util/SocketService.dart';
 import 'file:///C:/Users/ADMIN/Desktop/Working_Tesse/flutter_app/lib/Util/sizes_helper.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 import 'package:flutterapp/Screen/Home/widgets/_MyHeader.dart' as MyHeader;
 import 'package:flutterapp/Screen/Home/widgets/_MyListView.dart' as MyListView;
 
 Future<Recipes> fetchRecipes() async {
-  final response = await http.get('http://192.168.1.16:4000/Recipes/GetAll');
-
+  final response =
+      await http.get(new Uri.http('192.168.1.41:4000', '/Recipes/GetAll/'));
   if (response.statusCode == 200) {
     return Recipes.fromJson(jsonDecode(response.body));
   } else {
@@ -24,9 +27,10 @@ Future<Recipes> fetchRecipes() async {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key key, this.title,this.socket}) : super(key: key);
 
   final String title;
+  final SocketService socket;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -35,6 +39,7 @@ class MyHomePage extends StatefulWidget {
 class PushNotificationMessage {
   final String title;
   final String body;
+
   PushNotificationMessage({
     @required this.title,
     @required this.body,
@@ -74,12 +79,12 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      ItemScreen(),
+      ChatScreen(
+        sService: widget.socket,
+      ),
       Container(color: Colors.amber)
     ]);
   }
-
-
 
   Future<void> init() async {
     if (!_initialized) {
@@ -112,7 +117,6 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       );
 
-
       _firebaseMessaging.requestNotificationPermissions(
           const IosNotificationSettings(
               sound: true, badge: true, alert: true, provisional: true));
@@ -136,6 +140,12 @@ class _MyHomePageState extends State<MyHomePage> {
     init();
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+
+  }
 
 
   @override
